@@ -1,0 +1,488 @@
+{
+  "name": "Agent builder",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "topic",
+              "value": "={{ $json.body.title }}",
+              "type": "string"
+            },
+            {
+              "id": "93e66e56-0e2b-4416-9b79-a51b16993b53",
+              "name": "outline",
+              "value": "={{ $json.body.outline }}",
+              "type": "string"
+            },
+            {
+              "id": "a85bc4f2-70b7-464e-8162-9f14cf698dfb",
+              "name": "draft",
+              "value": "={{ $json.body.draft }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "include": "selected",
+        "options": {}
+      },
+      "id": "b79b6e69-817a-443a-ab5a-7fc724c8456e",
+      "name": "Workflow Configuration",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -176,
+        848
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "12e7344c-bcbe-48a6-a439-ca0da38c82d7",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -400,
+        848
+      ],
+      "id": "0cb2a359-4d7e-4658-8f96-d5b2e3b777c2",
+      "name": "Webhook",
+      "webhookId": "12e7344c-bcbe-48a6-a439-ca0da38c82d7"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4.1-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "=You are an expert SEO content writer with deep knowledge of search intent, keyword optimization, and readability.\n\nTopic: {{ $('Workflow Configuration').item.json.topic }}\n\nYour task is to generate high-quality blog content that is informative, well-structured, and optimized for search engines.\n\nRequirements:\n- Title must be compelling, click-worthy, and **60 characters or fewer**\n- Outline must contain **4–5 logical main sections**\n- Article must be **approximately 500 words**\n- Tone must be **professional, clear, and authoritative**\n- Use natural keyword placement (avoid keyword stuffing)\n- Use short paragraphs for readability\n\nOutput Rules:\n- Return **ONLY valid JSON**\n- Do NOT include markdown, explanations, or extra text\n- Escape all quotes properly\n- Use plain text only (no HTML)\n\nReturn the response in **exactly this format**:\n\n{\n  \"title\": \"SEO-optimized title here\",\n  \"outline\": \"I. Introduction\\nII. Section One\\nIII. Section Two\\nIV. Section Three\\nV. Conclusion\",\n  \"article\": \"Full 500-word SEO-optimized article here\"\n}\n"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {
+          "maxTokens": 2000,
+          "temperature": 0.7
+        }
+      },
+      "id": "7525a470-fa36-4d53-b9b1-b2a850caa738",
+      "name": "Generate Blog Content",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        272,
+        832
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "EjWLdzVsMv9B54OD",
+          "name": "n8n free OpenAI API credits"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d5fafe92-412d-45cb-812c-b8a5b4df92d1",
+              "name": "errorMsg",
+              "value": "={{ $json.error }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        624,
+        944
+      ],
+      "id": "e93b9743-3111-46ff-823b-cfa9a4592e4b",
+      "name": "Error message"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "bcff57db-d698-41cc-a3b0-30638fbdc865",
+              "leftValue": "={{ $json.outline }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "77424b01-2f7d-4f05-a2a1-b4cfa06f4e90",
+              "leftValue": "={{ $json.draft }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        48,
+        848
+      ],
+      "id": "d5f5c464-d6f5-4ce9-bafd-c9f035427ece",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1NLkbmuKNjaGF6VIrU9u-1lzkwwVKsd5JNHqMNAK4OgU",
+          "mode": "list",
+          "cachedResultName": "Blog",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1NLkbmuKNjaGF6VIrU9u-1lzkwwVKsd5JNHqMNAK4OgU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1NLkbmuKNjaGF6VIrU9u-1lzkwwVKsd5JNHqMNAK4OgU/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Error": "={{ $json.errorMsg }}",
+            "Title": "={{ $('Workflow Configuration').item.json.topic }}"
+          },
+          "matchingColumns": [
+            "Title"
+          ],
+          "schema": [
+            {
+              "id": "Title",
+              "displayName": "Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Outine",
+              "displayName": "Outine",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Draft",
+              "displayName": "Draft",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Execute?",
+              "displayName": "Execute?",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Error",
+              "displayName": "Error",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        864,
+        944
+      ],
+      "id": "cdc9b261-669b-4f98-9d74-b277e0ac7478",
+      "name": "Update Error",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "A4T1xsfZgJWzpXWm",
+          "name": "Google Sheets account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1NLkbmuKNjaGF6VIrU9u-1lzkwwVKsd5JNHqMNAK4OgU",
+          "mode": "list",
+          "cachedResultName": "Blog",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1NLkbmuKNjaGF6VIrU9u-1lzkwwVKsd5JNHqMNAK4OgU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1NLkbmuKNjaGF6VIrU9u-1lzkwwVKsd5JNHqMNAK4OgU/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Outine": "={{ $json.outline }}",
+            "Draft": "={{ $json.article }}",
+            "Title": "={{ $('Workflow Configuration').item.json.topic }}",
+            "Error": "={{ null }}"
+          },
+          "matchingColumns": [
+            "Title"
+          ],
+          "schema": [
+            {
+              "id": "Title",
+              "displayName": "Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Outine",
+              "displayName": "Outine",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Draft",
+              "displayName": "Draft",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Execute?",
+              "displayName": "Execute?",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Error",
+              "displayName": "Error",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        848,
+        752
+      ],
+      "id": "9a9ec477-7cae-4a19-8a05-bd0cf5ae54a9",
+      "name": "Update Outline And Draft",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "A4T1xsfZgJWzpXWm",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// If your OpenAI output is already an object, use it directly\nlet data = $input.first().json.output[0].content[0].text;\n\n// If the output is a string (common in OpenAI nodes), parse it\nif (typeof data === 'string') {\n  data = JSON.parse(data);\n}\n\n// If the JSON is stored under a specific field (adjust if needed)\n// Example: items[0].json.output\nif (data.output && typeof data.output === 'string') {\n  data = JSON.parse(data.output);\n}\n\nreturn [\n  {\n    json: {\n      title: data.title,\n      outline: data.outline,\n      article: data.article\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        624,
+        752
+      ],
+      "id": "8acb079c-0bf8-487e-8012-b9269872f916",
+      "name": "Extract title, outline and article"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Workflow Configuration": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Workflow Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Blog Content": {
+      "main": [
+        [
+          {
+            "node": "Extract title, outline and article",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Error message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Error message": {
+      "main": [
+        [
+          {
+            "node": "Update Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract title, outline and article": {
+      "main": [
+        [
+          {
+            "node": "Update Outline And Draft",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Generate Blog Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "f3949869-10ab-4015-b251-50f697342436",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "687dd287a5856f9a396d1762119d53d8be17ae177ce2b8763fddc9e32d122346"
+  },
+  "id": "WAp7YYapioPf3QRt",
+  "tags": []
+}
