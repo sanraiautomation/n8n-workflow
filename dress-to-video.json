@@ -1,0 +1,632 @@
+{
+  "name": "baby dress",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -3488,
+        -1824
+      ],
+      "id": "d2a7b5ac-7e49-48a3-87bc-0fb404d92cb0",
+      "name": "Telegram Trigger",
+      "webhookId": "e937657f-6c65-4f9d-9308-eb5ab65e3469",
+      "credentials": {
+        "telegramApi": {
+          "id": "iAW6uqfiruwJ0O4O",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $json.message.photo[3].file_id }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -3264,
+        -1824
+      ],
+      "id": "bb9ce076-5b7f-4a93-a2f5-1c718e879bec",
+      "name": "Get a file",
+      "webhookId": "54b7e45e-f690-43a1-95f7-34a48064ed4b",
+      "credentials": {
+        "telegramApi": {
+          "id": "iAW6uqfiruwJ0O4O",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "binaryToPropery",
+        "destinationKey": "final_image",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        -3040,
+        -1824
+      ],
+      "id": "791be14d-60eb-4ad1-ba14-2449a97fb68f",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "operation": "sendPhoto",
+        "chatId": "1068446901",
+        "binaryData": true,
+        "binaryPropertyName": "image",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -2144,
+        -1824
+      ],
+      "id": "d92169c5-486d-4c8c-919d-65237a6a1dea",
+      "name": "Send a photo message",
+      "webhookId": "485cd275-7ee6-4052-9235-d3876b49b531",
+      "credentials": {
+        "telegramApi": {
+          "id": "iAW6uqfiruwJ0O4O",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "chatId": "1068446901",
+        "message": "Send  this image for video generation?",
+        "approvalOptions": {
+          "values": {
+            "approvalType": "double"
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -1920,
+        -1824
+      ],
+      "id": "857f3335-ce70-4932-89eb-17a495c82481",
+      "name": "Approval",
+      "webhookId": "4a01d1e9-76c8-49fc-b252-bc4a5d7f8196",
+      "credentials": {
+        "telegramApi": {
+          "id": "iAW6uqfiruwJ0O4O",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openRouterApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"google/gemini-3-pro-image-preview\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": [\n        {\n          \"type\": \"text\",\n          \"text\": \"{{ $json.prompt }}\"\n        },\n        {\n          \"type\": \"image_url\",\n          \"image_url\": {\n            \"url\": \"data:image/jpeg;base64, {{ $json.image }}\"\n          }\n        }\n      ]\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -2592,
+        -1824
+      ],
+      "id": "5a24d8a5-3ea3-4e3a-a040-ee73d407cceb",
+      "name": "Open router",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "DgfH0OzacH5TsgZq",
+          "name": "openrouter"
+        },
+        "openRouterApi": {
+          "id": "fh7hgdLBZqGIliHZ",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5fbd544c-c329-4148-97b9-7e0d0569dc43",
+              "name": "prompt",
+              "value": "=A realistic baby aged 0–6 months is lying flat on their back, wearing the exact same dress shown in the input image. The full dress must remain completely visible at all times with no cropping or occlusion. The baby has a soft, gentle, natural smile, with a calm and pleasant facial expression maintained throughout the video. Use a front-facing camera angle only, with a stable camera, no zoom, no rotation, and no camera movement. The composition is centered and product-focused. Lighting is soft, warm, and natural, with a clean, minimal background and a photorealistic, high-quality texture. No stylization, filters, or artistic effects. Baby movement is extremely subtle, limited to slow, smooth, gentle hand movements and small, happy baby gestures, with minimal, fully natural body motion. Strictly no standing, sitting, walking, turning, sudden movements, head shaking, excessive arm or leg motion, tongue out, talking, lip-sync, mouth animation, or exaggerated facial expressions. Dress integrity is critical: the dress color, texture, pattern, and fit must remain exactly the same as the input image, with no distortion, color shift, or fabric changes, and it must look identical throughout. Audio should be soft, joyful baby background music only, with no vocals, no speech, and no sound effects tied to mouth movement. The overall goal is a warm, cute, realistic, minimal-motion product video ideal for Instagram and TikTok baby clothing advertisements, with maximum focus on the dress and the baby’s natural charm.",
+              "type": "string"
+            },
+            {
+              "id": "91dd5f9e-8efd-44d3-88a0-1f82af105402",
+              "name": "image",
+              "value": "={{ $json.base64Image }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2896,
+        -1520
+      ],
+      "id": "6354ebea-29d7-453f-a60e-72523e7e68f7",
+      "name": "KlingAi prompt and image"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5fbd544c-c329-4148-97b9-7e0d0569dc43",
+              "name": "prompt",
+              "value": "=Create a photorealistic image of a 4–6 month old baby wearing the exact dress from the provided image, preserving the original color, texture, pattern, and fit. Scene & Pose:  Front-facing camera angle Baby is lying flat on their back (supine position) on a bed Baby is not sitting, standing, or propped up Appearance & Expression:  Baby is wearing only the extracted dress, correctly fitted Both hands are covered with white baby mittens Mittens are simple pocket-style gloves (no individual finger separations) Baby is looking toward the camera Calm, gentle, natural facial expression Environment & Lighting:  Soft, neutral-colored bedding Natural, realistic lighting Highly realistic skin texture and fabric detail The final image should look like a real-life photograph, not an illustration or stylized render.",
+              "type": "string"
+            },
+            {
+              "id": "91dd5f9e-8efd-44d3-88a0-1f82af105402",
+              "name": "image",
+              "value": "={{ $json.final_image }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2816,
+        -1824
+      ],
+      "id": "de00feaf-f5f3-497a-b9d4-fe284c6b48c4",
+      "name": "OpenRouter prompt and image"
+    },
+    {
+      "parameters": {
+        "amount": 1,
+        "unit": "minutes"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -2448,
+        -1520
+      ],
+      "id": "ea919e93-fe99-47db-89bf-55147498d7d8",
+      "name": "Wait",
+      "webhookId": "36ee0596-7ede-48ad-b7b1-b951f70faf50"
+    },
+    {
+      "parameters": {
+        "jsCode": "const imageData = $input.first().json.choices[0].message.images[0].image_url.url;\n\n// Remove base64 prefix\nconst base64 = imageData.replace(/^data:image\\/\\w+;base64,/, \"\");\n\nreturn [\n  {\n    binary: {\n      image: {\n        data: base64,\n        mimeType: 'image/jpeg',\n        fileName: 'generated-image.jpg'\n      }\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2368,
+        -1824
+      ],
+      "id": "792d0015-8cb5-4fe4-a477-617b409eedf7",
+      "name": "Convert to binary base64"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the image data from previous node\nconst imageDataUri = $('Open router').first().json.choices[0].message.images[0].image_url.url; // Adjust the path to match your data\n\n// Remove the \"data:image/jpeg;base64,\" prefix\nconst base64Only = imageDataUri.split(',')[1];\n\nreturn {\n  json: {\n    base64Image: base64Only\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -3168,
+        -1520
+      ],
+      "id": "b5c87325-edb7-4a1d-8add-4393827303c9",
+      "name": "Convert to json base64"
+    },
+    {
+      "parameters": {
+        "url": "=https://api-singapore.klingai.com/v1/videos/image2video/{{ $('KlingAI post request').item.json.data.task_id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJBdHlQZ2JwM3BKUkFuYkI4NDlMUERyM1EzZVJMaE1uSyIsImV4cCI6MTc2Nzk0Njc5OCwibmJmIjoxNzY3Njg3NTM4fQ.LKWAnRpMpRphb51FR7FezV52dRdDrpwsYQ1uJOVxeSs"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -2240,
+        -1520
+      ],
+      "id": "2ce942dc-705e-419a-a268-18d5bd87ffcc",
+      "name": "KlingAI get request"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api-singapore.klingai.com/v1/videos/image2video",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJBdHlQZ2JwM3BKUkFuYkI4NDlMUERyM1EzZVJMaE1uSyIsImV4cCI6MTc2Nzk0Njc5OCwibmJmIjoxNzY3Njg3NTM4fQ.LKWAnRpMpRphb51FR7FezV52dRdDrpwsYQ1uJOVxeSs"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"model_name\": \"kling-v1\",\n    \"mode\": \"pro\",\n    \"duration\": \"10\",\n    \"image\": \"{{ $json.image }}\",    \n    \"prompt\": \"{{ $json.prompt }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -2672,
+        -1520
+      ],
+      "id": "e6960278-810a-41e6-aaeb-f0cdaf6570b1",
+      "name": "KlingAI post request"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "e53b3d0e-52b0-42ec-ad92-7a344ed1a817",
+              "leftValue": "={{ $json.data.approved }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -3440,
+        -1504
+      ],
+      "id": "15a80722-6369-415f-b05e-4a16414df3fe",
+      "name": "Telegram photo approved?"
+    },
+    {
+      "parameters": {
+        "operation": "sendVideo",
+        "chatId": "1068446901",
+        "binaryData": true,
+        "binaryPropertyName": "video",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -2624,
+        -1200
+      ],
+      "id": "94a68ad5-03ba-489c-8bd1-140d5efb6936",
+      "name": "Send a video",
+      "webhookId": "cd9ac6b0-f151-42b4-821f-524cdda73123",
+      "credentials": {
+        "telegramApi": {
+          "id": "iAW6uqfiruwJ0O4O",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.data.task_result.videos[0].url }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "video"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -2832,
+        -1200
+      ],
+      "id": "bd3c3921-8af9-454a-b436-6e0fe1f2b685",
+      "name": "Download a video"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "d1506d9b-90f1-4006-bc68-b7569e036354",
+              "leftValue": "={{ $json.message }}",
+              "rightValue": "SUCCEED",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "f6adf2e6-aec1-4087-84d4-a677a9117ce4",
+              "leftValue": "={{ $json.data.task_status }}",
+              "rightValue": "succeed",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -2000,
+        -1520
+      ],
+      "id": "436d96e4-0c63-40bf-a2de-4b779baa6b6a",
+      "name": "Is video output complete?"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get a file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a file": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "OpenRouter prompt and image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a photo message": {
+      "main": [
+        [
+          {
+            "node": "Approval",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Approval": {
+      "main": [
+        [
+          {
+            "node": "Telegram photo approved?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Open router": {
+      "main": [
+        [
+          {
+            "node": "Convert to binary base64",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "KlingAi prompt and image": {
+      "main": [
+        [
+          {
+            "node": "KlingAI post request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter prompt and image": {
+      "main": [
+        [
+          {
+            "node": "Open router",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "KlingAI get request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to binary base64": {
+      "main": [
+        [
+          {
+            "node": "Send a photo message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to json base64": {
+      "main": [
+        [
+          {
+            "node": "KlingAi prompt and image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "KlingAI get request": {
+      "main": [
+        [
+          {
+            "node": "Is video output complete?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "KlingAI post request": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram photo approved?": {
+      "main": [
+        [
+          {
+            "node": "Convert to json base64",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Download a video": {
+      "main": [
+        [
+          {
+            "node": "Send a video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is video output complete?": {
+      "main": [
+        [
+          {
+            "node": "Download a video",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "5879f3b9-0588-4e20-bb2e-184b3af9dbf1",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7fc78f08d2f3a52410931a3e78b7e743c79262bb7e489b54c9e879f2a90a3864"
+  },
+  "id": "bDaBuepVVfEWBAFe",
+  "tags": []
+}
