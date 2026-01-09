@@ -1,0 +1,180 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -384,
+        -224
+      ],
+      "id": "507d51f9-ec25-4592-88f5-d21a4510c572",
+      "name": "When chat message received",
+      "webhookId": "3cbb1849-721c-4d4a-b10e-0c31de17c959"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are a helpful assistant. When a user asks about cricket, you have a great tool to fetch the knowledge"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -128,
+        -240
+      ],
+      "id": "cbe55962-13ed-428f-a237-89399aba2e3b",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -288,
+        16
+      ],
+      "id": "bb392eb8-100d-4c96-91f3-e0a25db682b1",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "1IPUPzxk9gtYZqfH",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -112,
+        64
+      ],
+      "id": "9fddd755-7ff1-4fe9-8024-162d0537f2a8",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "When the user ask for anything relating to cricket, then chances are this is a great tool",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "cricket-record",
+          "mode": "list",
+          "cachedResultName": "cricket-record"
+        },
+        "options": {
+          "pineconeNamespace": "rules-regulation"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        160,
+        -64
+      ],
+      "id": "63e69a12-6c19-4b3b-85aa-5a7d15139eec",
+      "name": "Pinecone Vector Store",
+      "credentials": {
+        "pineconeApi": {
+          "id": "RuZSe7R8uCGjXiD7",
+          "name": "PineconeApi account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        64,
+        96
+      ],
+      "id": "4dc7304c-5d3c-4c9c-bfcd-4f421a8a084e",
+      "name": "Embeddings Google Gemini",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "1IPUPzxk9gtYZqfH",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "edafa8b6-5cef-4485-b8ef-45682587d801",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7fc78f08d2f3a52410931a3e78b7e743c79262bb7e489b54c9e879f2a90a3864"
+  },
+  "id": "oxX8nQngXZREzwOi",
+  "tags": []
+}
