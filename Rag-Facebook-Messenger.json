@@ -1,0 +1,302 @@
+{
+  "name": "RAG Facebook Messenger",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body.entry[0].messaging[0].message.text }}",
+        "options": {
+          "systemMessage": "You are a Store Assistant AI.\n\nYour responsibility is to answer customer questions about products accurately, concisely, and professionally.\n\nData Sources (STRICT RULES)\nProduct Information\n\nFor brand, category, description, and availability\n→ ALWAYS query the vector database\n\nNever answer product-related questions from memory\n\nIf information is missing, respond exactly with:\n“Sorry, that information is currently unavailable.”\n\nPrice Information\n\nIf the customer asks about price:\n\nALWAYS fetch the price from Google Sheets\n\nDo NOT guess\n\nDo NOT reuse prices from previous answers or the vector database\n\nOrdering Logic (IMPORTANT)\nIf the customer clearly states intent to buy\n\nExamples:\n\n“I want to order this laptop”\n\n“Buy this”\n\n“Checkout”\n\n“Purchase this product”\n\n➡️ Immediately provide the order form link:\n\n👉 https://form.jotform.com/260110305813441\n\nIf the customer is only asking about product details\n\nExamples:\n\n“Is this laptop available?”\n\n“What are the specs?”\n\n“Tell me more about this product”\n\n➡️ DO NOT provide the order link\n\nInstead, ask a follow-up question:\n\n“Would you like to place an order for this product?”\n\nIf the customer answers YES to the follow-up\n\nExamples:\n\n“Yes”\n\n“Yes, I want to order”\n\n“Sure”\n\n“Okay”\n\n➡️ Provide the order form link:\n\n👉 https://form.jotform.com/260110305813441\n\nUnavailable Products\n\nIf the product is out of stock or unavailable, clearly inform the customer.\n\nDo not provide the order form for unavailable products.\n\nResponse Guidelines\n\nBe clear, short, and professional\n\nUse bullet points when listing product details\n\nDo not mention internal tools\n\nDo not make assumptions\n\nDo not hallucinate missing information"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -736,
+        -800
+      ],
+      "id": "57ee929f-5b39-49f8-a117-554237054363",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Call this tool to access the database to answer the user's question",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "laptop-store",
+          "mode": "list",
+          "cachedResultName": "laptop-store"
+        },
+        "topK": 5,
+        "options": {
+          "pineconeNamespace": "laptop"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        -368,
+        -704
+      ],
+      "id": "24f65ddd-cc86-4502-b83c-99fdd3faae7b",
+      "name": "Pinecone Vector Store",
+      "credentials": {
+        "pineconeApi": {
+          "id": "RuZSe7R8uCGjXiD7",
+          "name": "PineconeApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-4o",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -992,
+        -640
+      ],
+      "id": "47445507-947e-424d-bfb1-bc89ac0f137e",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "fh7hgdLBZqGIliHZ",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "=text-embedding-3-small",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -160,
+        -480
+      ],
+      "id": "a3810bfd-aad1-4b48-9a37-e32706f54598",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "7cD2ZTxVFN9RVZda",
+          "name": "router openai"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.body.entry[0].messaging[0].recipient.id }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -784,
+        -512
+      ],
+      "id": "4b1e70ee-3345-4ac8-8563-9b42c7aabcef",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/v24.0/{{ $('Facebook Webhook').item.json.body.entry[0].messaging[0].recipient.id }}/messages",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "access_token",
+              "value": "EAALvaV7BXIUBQbR0mcSd4KObZAu6LKzJZCQJZCWNOqm8I00NEaDJa0YXcsATcPOHri7sgb5UZBfvHsoS0DrdqpZBnJtFvVBX9MQArrq02PJmhTiCNt6ZCUaC8WrLBG0YlBukSzjlJI5Mb7gZBU2MMArXkyOBfuNRFpveveOAIF5LGdkm88g6ljSkW8XsNbh5Bto7dLHX4PH6gZDZD"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"recipient\": {\n    \"id\": \"{{ $('Facebook Webhook').item.json.body.entry[0].messaging[0].sender.id }}\"\n  },\n  \"messaging_type\": \"RESPONSE\",\n  \"message\": {\n    \"text\": \"{{ $json.text }}\"\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -176,
+        -1056
+      ],
+      "id": "981fde7d-a95d-4e83-948b-c5575a5b0a6f",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1loDNad1x2d_lJjGxj2It8axX79iahqBtzdkCx7dlTBo",
+          "mode": "list",
+          "cachedResultName": "Laptop",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1loDNad1x2d_lJjGxj2It8axX79iahqBtzdkCx7dlTBo/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1loDNad1x2d_lJjGxj2It8axX79iahqBtzdkCx7dlTBo/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        -496,
+        -528
+      ],
+      "id": "cdbf3622-a535-41f9-b04c-012ed541dbdd",
+      "name": "Laptop price",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "SjJGxJTt7aZXIRWo",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// const text = $input.first().json.output;\n\n// return [\n//   {\n//     text: text.replace(/\\n/g, '')\n//   }\n// ];\nconst text = $input.first().json.output;\n\nreturn [\n  {\n    text: text\n      .replace(/\\r?\\n/g, '\\\\n')   // escape newlines for JSON\n      .replace(/\\*\\*/g, '')       // remove markdown bold\n      .replace(/\\*/g, '')         // remove markdown bullets\n      .replace(/- /g, '• ')       // nicer bullets\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -432,
+        -1024
+      ],
+      "id": "70dda0a0-9185-4dc6-a770-5e182d648af8",
+      "name": "Improve text format"
+    },
+    {
+      "parameters": {
+        "multipleMethods": true,
+        "httpMethod": [
+          "POST"
+        ],
+        "path": "e6de803b-0327-4d62-be05-e4dd1ed199b0",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -928,
+        -976
+      ],
+      "id": "d8f3b3d0-c1e1-41b9-abfa-433870c38fb5",
+      "name": "Facebook Webhook",
+      "webhookId": "e6de803b-0327-4d62-be05-e4dd1ed199b0"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Pinecone Vector Store": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Improve text format",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Laptop price": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Improve text format": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Facebook Webhook": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "22efe77f-7153-4156-a4f5-0dd848e65003",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7fc78f08d2f3a52410931a3e78b7e743c79262bb7e489b54c9e879f2a90a3864"
+  },
+  "id": "QT8bQyUPY0d6R4F5",
+  "tags": []
+}

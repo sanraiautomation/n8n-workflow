@@ -1,0 +1,303 @@
+{
+  "name": "jotform laptop",
+  "nodes": [
+    {
+      "parameters": {
+        "form": "260110305813441"
+      },
+      "type": "n8n-nodes-base.jotFormTrigger",
+      "typeVersion": 1,
+      "position": [
+        -400,
+        -720
+      ],
+      "id": "ce632bf9-b281-4a14-8a3a-dacb1da91a71",
+      "name": "Jotform Trigger",
+      "webhookId": "b4d982fb-59a7-4b0a-ab7f-fa76e6822a4c",
+      "credentials": {
+        "jotFormApi": {
+          "id": "ZzE684jgc5Ue4rRu",
+          "name": "JotForm account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1TLL0xO9Qdu6DhoRtFPYBibETLbDHID5eh1Q3foq4FDo",
+          "mode": "list",
+          "cachedResultName": "Order Invoice",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1TLL0xO9Qdu6DhoRtFPYBibETLbDHID5eh1Q3foq4FDo/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1TLL0xO9Qdu6DhoRtFPYBibETLbDHID5eh1Q3foq4FDo/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "JotForm Id": "={{ $json.id }}",
+            "Product": "={{ $json.product }}",
+            "Email": "={{ $json.email }}",
+            "Phone number": "={{ $json.phoneNumber }}",
+            "Customer Name": "={{ $json.name }}",
+            "address": "={{ $json.address }}",
+            "Amount": "={{ $json.amount }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "JotForm Id",
+              "displayName": "JotForm Id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Product",
+              "displayName": "Product",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Customer Name",
+              "displayName": "Customer Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "address",
+              "displayName": "address",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Phone number",
+              "displayName": "Phone number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Amount",
+              "displayName": "Amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -16,
+        -720
+      ],
+      "id": "6a7b3a5e-b991-4dbe-b637-787a681f3a44",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "SjJGxJTt7aZXIRWo",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7c6cfa09-8dd9-4b86-ba8e-0079906c4a4e",
+              "name": "id",
+              "value": "={{ $json['My Products']['0'].id }} ",
+              "type": "string"
+            },
+            {
+              "id": "0020745e-615f-494a-81d6-81cadb1d8f61",
+              "name": "name",
+              "value": "={{ $json['Your Name'].first }} {{ $json['Your Name'].last }}",
+              "type": "string"
+            },
+            {
+              "id": "7d848f55-991d-4a1e-b133-7a62e00e11f0",
+              "name": "email",
+              "value": "={{ $json['Your Email'] }}",
+              "type": "string"
+            },
+            {
+              "id": "5eadbe53-03c3-43e9-8059-6a0ad1decd44",
+              "name": "phoneNumber",
+              "value": "={{ $json['Phone Number'].country }} {{ $json['Phone Number'].area }} {{ $json['Phone Number'].phone }}",
+              "type": "string"
+            },
+            {
+              "id": "4fa21b63-7eda-4798-b364-74ed26da2651",
+              "name": "address",
+              "value": "={{ $json['Billing Address'].addr_line1 }} {{ $json['Billing Address'].addr_line2 }} {{ $json['Billing Address'].city }} {{ $json['Billing Address'].postal }} {{ $json['Billing Address'].country }}",
+              "type": "string"
+            },
+            {
+              "id": "72452436-82d6-44d5-8680-d7518f367ce1",
+              "name": "amount",
+              "value": "={{ $json['My Products'].products[0].subTotal }}",
+              "type": "number"
+            },
+            {
+              "id": "a06cdc2e-4694-4ec4-b56d-4e27ee59961c",
+              "name": "product",
+              "value": "={{ $json['My Products'].products[0].productName }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -208,
+        -720
+      ],
+      "id": "b30c0ec3-c2a0-4111-b344-f0674be80c35",
+      "name": "Customer Info"
+    },
+    {
+      "parameters": {
+        "sendTo": "decentralmind@gmail.com",
+        "subject": "=New order no: {{ $json['JotForm Id'] }}received.",
+        "message": "=You have received a new order<br><br>\n\nOrder No:{{ $('Customer Info').item.json.id }} <br>\nProduct: {{ $('Customer Info').item.json.product }}<br>\nEmail: {{ $('Customer Info').item.json.email }}<br>\nPhone Num: {{ $('Customer Info').item.json.phoneNumber }}<br>\nCustomer Name: {{ $('Customer Info').item.json.name }}<br>\nAddress: {{ $('Customer Info').item.json.address }}<br>\nAmount: {{ $('Customer Info').item.json.amount }}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        192,
+        -720
+      ],
+      "id": "ee7f8c85-7e85-43fd-a409-aefe191d7395",
+      "name": "Order received",
+      "webhookId": "51af9e6d-c9e5-49e8-846c-4e8d7844db3c",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "OAEPECusrz4bvCBr",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Jotform Trigger').item.json['Your Email'] }}",
+        "subject": "=New order {{ $('Customer Info').item.json.id }} has been received.",
+        "message": "=Thank you for placing an order. \n\nYour order details.<br>\n<br>\n\nOrder No:{{ $('Customer Info').item.json.id }} <br>\nProduct: {{ $('Customer Info').item.json.product }}<br>\nEmail: {{ $('Customer Info').item.json.email }}<br>\nPhone Num: {{ $('Customer Info').item.json.phoneNumber }}<br>\nCustomer Name: {{ $('Customer Info').item.json.name }}<br>\nAddress: {{ $('Customer Info').item.json.address }}<br>\nAmount: {{ $('Customer Info').item.json.amount }}\n\n\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        400,
+        -720
+      ],
+      "id": "492185dd-2558-40ad-a09b-07b13c83184c",
+      "name": "Thank you buyer",
+      "webhookId": "2f64abbb-ee43-45aa-a54b-ce270419227c",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "OAEPECusrz4bvCBr",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Jotform Trigger": {
+      "main": [
+        [
+          {
+            "node": "Customer Info",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Customer Info": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Order received",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Order received": {
+      "main": [
+        [
+          {
+            "node": "Thank you buyer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "495752e3-83bc-4f62-84c9-ac4a64425b45",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7fc78f08d2f3a52410931a3e78b7e743c79262bb7e489b54c9e879f2a90a3864"
+  },
+  "id": "baRP2LA3TlKfZGmy",
+  "tags": []
+}
